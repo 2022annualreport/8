@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ave AI - موقعنا</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset & base */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: #0a0a0a; color: #fff; line-height: 1.6; }
+
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background-color: #0d0d0d; }
+        header .logo { font-size: 1.8rem; font-weight: 700; color: #00ffff; text-decoration: none; }
+        nav ul { display: flex; list-style: none; gap: 30px; }
+        nav ul li a { color: #fff; text-decoration: none; font-weight: 500; transition: color 0.3s; }
+        nav ul li a:hover { color: #00ffff; }
+
+        /* Hero Section */
+        .hero { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 100px 20px; background: linear-gradient(90deg,#0a0a0a 0%,#111 100%); }
+        .hero h1 { font-size: 3rem; margin-bottom: 20px; color: #00ffff; }
+        .hero p { font-size: 1.2rem; margin-bottom: 30px; max-width: 700px; }
+        .hero .btn { padding: 15px 30px; background-color: #00ffff; color: #0a0a0a; font-weight: 700; border: none; border-radius: 5px; cursor: pointer; transition: background 0.3s; text-decoration: none; }
+        .hero .btn:hover { background-color: #00cccc; }
+
+        /* Features Section */
+        .features { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; padding: 80px 20px; background-color: #111; }
+        .feature { flex: 1 1 250px; background-color: #1a1a1a; border-radius: 10px; padding: 30px; text-align: center; transition: transform 0.3s; }
+        .feature:hover { transform: translateY(-10px); }
+        .feature h3 { color: #00ffff; margin-bottom: 15px; }
+        .feature p { color: #ccc; }
+
+        /* Footer */
+        footer { padding: 40px 20px; text-align: center; background-color: #0d0d0d; color: #888; }
+        footer a { color: #00ffff; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav ul { flex-direction: column; gap: 15px; margin-top: 15px; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="#" class="logo">Ave AI</a>
+        <nav>
+            <ul>
+                <li><a href="#">الرئيسية</a></li>
+                <li><a href="#">التحليلات</a></li>
+                <li><a href="#">التداول</a></li>
+                <li><a href="#">المحفظة</a></li>
+                <li><a href="#">الدعم</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>تحليلات وذكاء اصطناعي للعملات الرقمية</h1>
+        <p>تابع جميع بيانات العملات الرقمية والتداول اللامركزي مع منصتنا الحديثة التي توفر لك تحليلات دقيقة وتنبيهات فورية.</p>
+        <a href="#" class="btn">ابدأ الآن</a>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="feature">
+            <h3>تداول آمن</h3>
+            <p>قم بإدارة جميع معاملاتك عبر منصتنا بأمان مع واجهة سهلة الاستخدام ومحفظة متكاملة.</p>
+        </div>
+        <div class="feature">
+            <h3>تحليلات حية</h3>
+            <p>راقب نشاط السوق في الوقت الحقيقي مع بيانات شاملة حول الأسعار، السيولة، والمعاملات.</p>
+        </div>
+        <div class="feature">
+            <h3>تنبيهات ذكية</h3>
+            <p>استقبل إشعارات دقيقة وفورية حول تغيرات الأسعار والفرص الاستثمارية المهمة.</p>
+        </div>
+        <div class="feature">
+            <h3>دعم متعدد الشبكات</h3>
+            <p>متوافق مع أكثر من 130 شبكة بلوكشين و300 منصة تداول لامركزي لتجربة شاملة.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2026 Ave AI. جميع الحقوق محفوظة. | <a href="#">سياسة الخصوصية</a>
+    </footer>
+
+</body>
+</html>
