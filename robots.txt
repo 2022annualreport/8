@@ -1,4 +1,7 @@
 User-agent: *
+Allow: /tuaa/video/
 Allow: /
 
 Sitemap: https://app.ave.ai/sitemap.xml
+
+Sitemap: https://app.ave.ai/tuaa/video/sitemap.xml
