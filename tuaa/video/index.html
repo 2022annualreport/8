@@ -7,3 +7,37 @@
 
   gtag('config', 'G-XXKB7T9VTR');
 </script>
+<div id="links-container" style="padding: 20px; background: #fff; margin-top: 50px; border-top: 1px solid #eee;">
+    <h3>آخر التحديثات والحصريات:</h3>
+    <ul id="auto-links" style="list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+        </ul>
+</div>
+
+<script>
+    // سكريبت بسيط يجلب الروابط من السايت ماب لضمان توزيع القوة
+    fetch('/sitemap.xml')
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(data, "application/xml");
+            const locs = xml.getElementsByTagName("loc");
+            const list = document.getElementById('auto-links');
+
+            for (let i = 0; i < locs.length; i++) {
+                let url = locs[i].textContent;
+                // تخطي الرابط الرئيسي نفسه
+                if (url.endsWith('.html') && !url.includes('index.html')) {
+                    let li = document.createElement('li');
+                    let a = document.createElement('a');
+                    a.href = url;
+                    // تحويل الرابط لاسم مقروء (اختياري)
+                    let name = url.split('/').pop().replace('.html', '').replace(/-/g, ' ');
+                    a.textContent = decodeURIComponent(name); 
+                    a.style.color = "#0066cc";
+                    a.style.textDecoration = "none";
+                    li.appendChild(a);
+                    list.appendChild(li);
+                }
+            }
+        });
+</script>
