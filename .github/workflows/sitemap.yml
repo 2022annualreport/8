@@ -1,0 +1,44 @@
+name: Auto Sitemap for tuaa/video (HTML only, no cache)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-sitemap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Generate sitemap.xml with timestamp
+        run: |
+          SITEMAP="tuaa/video/sitemap.xml"
+          BASE_URL="https://android.mpv.io"
+          TIMESTAMP=$(date +%s)
+
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > $SITEMAP
+          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> $SITEMAP
+
+          find tuaa/video -type f -name "*.html" | while read file; do
+            LASTMOD=$(git log -1 --format="%cI" -- "$file")
+            # أضف query string مع timestamp
+            URL="${BASE_URL}/${file}?v=${TIMESTAMP}"
+
+            echo "  <url>" >> $SITEMAP
+            echo "    <loc>${URL}</loc>" >> $SITEMAP
+            echo "    <lastmod>${LASTMOD}</lastmod>" >> $SITEMAP
+            echo "  </url>" >> $SITEMAP
+          done
+
+          echo '</urlset>' >> $SITEMAP
+
+      - name: Commit sitemap.xml
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add tuaa/video/sitemap.xml
+          git commit -m "Update sitemap.xml with timestamp to avoid cache" || echo "No changes"
+          git push
