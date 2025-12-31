@@ -1,44 +1,57 @@
-name: Auto Sitemap for tuaa/video (HTML only, no cache)
+name: Update Sitemap tuaa/video
 
 on:
   push:
     branches:
       - main
 
-jobs:
-  generate-sitemap:
-    runs-on: ubuntu-latest
+permissions:
+  contents: write
 
+jobs:
+  update-sitemap:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate sitemap.xml with timestamp
+      - name: Update sitemap.xml
         run: |
           SITEMAP="tuaa/video/sitemap.xml"
-          BASE_URL="https://android.mpv.io"
-          TIMESTAMP=$(date +%s)
+          BASE_URL="https://app.ave.ai"
 
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > $SITEMAP
-          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> $SITEMAP
+          TMP_SITEMAP=$(mktemp)
 
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > "$TMP_SITEMAP"
+          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> "$TMP_SITEMAP"
+
+          # نسخ الروابط القديمة كما هي
+          if [ -f "$SITEMAP" ]; then
+            sed -n '/<url>/,/<\/url>/p' "$SITEMAP" >> "$TMP_SITEMAP"
+          fi
+
+          # إضافة الصفحات الجديدة فقط
           find tuaa/video -type f -name "*.html" | while read file; do
-            LASTMOD=$(git log -1 --format="%cI" -- "$file")
-            # أضف query string مع timestamp
-            URL="${BASE_URL}/${file}?v=${TIMESTAMP}"
+            URL="${BASE_URL}/${file}"
 
-            echo "  <url>" >> $SITEMAP
-            echo "    <loc>${URL}</loc>" >> $SITEMAP
-            echo "    <lastmod>${LASTMOD}</lastmod>" >> $SITEMAP
-            echo "  </url>" >> $SITEMAP
+            if ! grep -q "<loc>${URL}</loc>" "$SITEMAP"; then
+              LASTMOD=$(git log -1 --format="%cI" -- "$file")
+              echo "  <url>" >> "$TMP_SITEMAP"
+              echo "    <loc>${URL}</loc>" >> "$TMP_SITEMAP"
+              echo "    <lastmod>${LASTMOD}</lastmod>" >> "$TMP_SITEMAP"
+              echo "  </url>" >> "$TMP_SITEMAP"
+            fi
           done
 
-          echo '</urlset>' >> $SITEMAP
+          echo '</urlset>' >> "$TMP_SITEMAP"
+          mv "$TMP_SITEMAP" "$SITEMAP"
 
-      - name: Commit sitemap.xml
+      - name: Commit updated sitemap.xml
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add tuaa/video/sitemap.xml
-          git commit -m "Update sitemap.xml with timestamp to avoid cache" || echo "No changes"
+          git commit -m "Update tuaa/video sitemap.xml" || echo "No changes"
           git push
