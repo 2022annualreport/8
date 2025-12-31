@@ -1,7 +1,7 @@
 - name: Update sitemap.xml
   run: |
     SITEMAP="tuaa/video/sitemap.xml"
-    BASE_URL="https://android.mpv.io"
+    BASE_URL="https://app.ave.ai"
 
     TMP_SITEMAP=$(mktemp)
 
