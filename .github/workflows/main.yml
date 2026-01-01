@@ -1,0 +1,34 @@
+name: Auto Google Indexing
+
+on:
+  push:
+    branches:
+      - main  # يعمل عند رفع أي تحديث للكود
+  workflow_dispatch: # يسمح لك بالتشغيل اليدوي في أي وقت
+  schedule:
+    # سيتم تشغيل السكربت يومياً الساعة 03:00 بتوقيت UTC
+    # (أي الساعة 06:00 صباحاً بتوقيت مكة المكرمة)
+    - cron: '0 3 * * *'
+
+jobs:
+  indexing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests oauth2client
+
+      - name: Run Indexing Script
+        env:
+          GOOGLE_CREDS: ${{ secrets.GOOGLE_INDEXING_CREDENTIALS }}
+        run: |
+          echo "$GOOGLE_CREDS" > service_account.json
+          python indexing_script.py
