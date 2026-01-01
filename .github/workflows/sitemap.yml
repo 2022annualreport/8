@@ -1,57 +1,52 @@
-name: Update Sitemap tuaa/video
+name: Update Sitemap and Smart Linking
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  update-sitemap:
+  update-all:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run Smart Linker
+        run: python linker.py
 
       - name: Update sitemap.xml
         run: |
-          SITEMAP="tuaa/video/sitemap.xml"
+          SITEMAP="sitemap.xml"
           BASE_URL="https://app.ave.ai"
-
           TMP_SITEMAP=$(mktemp)
-
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > "$TMP_SITEMAP"
-          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> "$TMP_SITEMAP"
-
-          # نسخ الروابط القديمة كما هي
-          if [ -f "$SITEMAP" ]; then
-            sed -n '/<url>/,/<\/url>/p' "$SITEMAP" >> "$TMP_SITEMAP"
-          fi
-
-          # إضافة الصفحات الجديدة فقط
+          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > "$TMP_SITEMAP"
           find tuaa/video -type f -name "*.html" | while read file; do
-            URL="${BASE_URL}/${file}"
-
-            if ! grep -q "<loc>${URL}</loc>" "$SITEMAP"; then
-              LASTMOD=$(git log -1 --format="%cI" -- "$file")
-              echo "  <url>" >> "$TMP_SITEMAP"
-              echo "    <loc>${URL}</loc>" >> "$TMP_SITEMAP"
-              echo "    <lastmod>${LASTMOD}</lastmod>" >> "$TMP_SITEMAP"
-              echo "  </url>" >> "$TMP_SITEMAP"
-            fi
+            echo "<url><loc>${BASE_URL}/${file}</loc><lastmod>$(date -I)</lastmod><priority>0.7</priority></url>" >> "$TMP_SITEMAP"
           done
-
           echo '</urlset>' >> "$TMP_SITEMAP"
           mv "$TMP_SITEMAP" "$SITEMAP"
 
-      - name: Commit updated sitemap.xml
+      - name: Commit and Push changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add tuaa/video/sitemap.xml
-          git commit -m "Update tuaa/video sitemap.xml" || echo "No changes"
-          git push
+          git add sitemap.xml tuaa/video/*.html
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Auto Smart Linking and Sitemap Update [skip ci]"
+          git pull --rebase origin main
+          git push origin main
