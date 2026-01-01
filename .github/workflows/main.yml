@@ -1,34 +1,61 @@
-name: Auto Google Indexing
+name: Update Sitemap and Smart Linking
 
 on:
   push:
     branches:
-      - main  # يعمل عند رفع أي تحديث للكود
-  workflow_dispatch: # يسمح لك بالتشغيل اليدوي في أي وقت
-  schedule:
-    # سيتم تشغيل السكربت يومياً الساعة 03:00 بتوقيت UTC
-    # (أي الساعة 06:00 صباحاً بتوقيت مكة المكرمة)
-    - cron: '0 3 * * *'
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  indexing:
+  update-all:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.x'
 
-      - name: Install Dependencies
-        run: |
-          pip install requests oauth2client
+      - name: Run Smart Linker
+        # تأكد أن السكربت المحفوظ في المستودع اسمه linker.py وليس أي اسم آخر
+        run: python linker.py
 
-      - name: Run Indexing Script
-        env:
-          GOOGLE_CREDS: ${{ secrets.GOOGLE_INDEXING_CREDENTIALS }}
+      - name: Update sitemap.xml
         run: |
-          echo "$GOOGLE_CREDS" > service_account.json
-          python indexing_script.py
+          SITEMAP="sitemap.xml"
+          BASE_URL="https://pasuk-old.dicta.org.il"
+          TMP_SITEMAP=$(mktemp)
+          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > "$TMP_SITEMAP"
+          
+          # إضافة الصفحات من مجلد tuaa/video
+          find tuaa/video -type f -name "*.html" | while read file; do
+            # إزالة المسار المحلي وإضافة الدومين
+            # file يكون شكلها tuaa/video/filename.html
+            echo "<url><loc>${BASE_URL}/${file}</loc><lastmod>$(date -I)</lastmod><priority>0.8</priority></url>" >> "$TMP_SITEMAP"
+          done
+          
+          echo '</urlset>' >> "$TMP_SITEMAP"
+          mv "$TMP_SITEMAP" "$SITEMAP"
+
+      - name: Commit and Push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add sitemap.xml tuaa/video/*.html
+          
+          # التحقق من وجود تغييرات قبل المحاولة
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          git commit -m "Auto Smart Linking and Sitemap Update [skip ci]"
+          git pull --rebase origin main
+          git push origin main
